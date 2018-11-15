@@ -39,8 +39,9 @@ def get_recommendations():
        	abort(400)
     moviesName = request.json.get('moviesName')
     moviesRating = request.json.get('moviesRating')
-    if len(moviesRating) != len(moviesName):
+    if isinstance(moviesName, str) and isinstance(moviesRating, str) and len(moviesRating) != len(moviesName):
          abort(400)
+	#TODO send a list of movies and send just one movie
 
     userProfile = []
     for i in range(0,len(moviesName)):
@@ -51,10 +52,10 @@ def get_recommendations():
     recommendations = print_res(userProfile)
     movies = []
     for i in range(0,len(recommendations)):
-        movie = {
-			'movieName': recommendations[i]
-		}
-        movies.append(movie)
+        # movie = {
+		# 	'movieName': recommendations[i]
+		# }
+        movies.append(recommendations[i])
     return jsonify({'movie':movies})
 
 def get_recommendations(userProfile):
@@ -90,4 +91,4 @@ def print_res(userProfile):
 # print_res(userProfile)
 
 if __name__ == '__main__':
-    app.run(host= '172.30.107.196')
+    app.run(host= '172.30.43.238')

@@ -41,7 +41,7 @@ def get_recommendations():
     moviesRating = request.json.get('moviesRating')
     if isinstance(moviesName, str) and isinstance(moviesRating, str) and len(moviesRating) != len(moviesName):
          abort(400)
-	#TODO send a list of movies and send just one movie
+	#TODO send a list of movies and send just one movie or movies that don't exist
 
     userProfile = []
     for i in range(0,len(moviesName)):

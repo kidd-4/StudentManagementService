@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 r_cols = ['user_id','movie_id','rating']
 ratings = pd.read_csv('/Users/grey/Documents/Big Data/project/files/ratings_small.csv',

@@ -50,9 +50,11 @@ userRatings = ratings.pivot_table(index=['user_id'],columns=['title'],values='ra
 corrMatrix = userRatings.corr(method='pearson',min_periods =100)
 # print (corrMatrix.head())
 
+#------------------------------------------------------------------------Read movies name file
+movies_name = set()
+with open('/Users/grey/Downloads/movies_name.txt',encoding='utf-16') as f:
+    movies_name = f.readlines()
 
-movies = [
-]
 
 # print(indices)
 
@@ -66,12 +68,16 @@ def get_recommendations():
     moviesRating = request.json.get('moviesRating')
     if isinstance(moviesName, str) and isinstance(moviesRating, str) and len(moviesRating) != len(moviesName):
          abort(400)
-	#TODO send a list of movies and send just one movie or movies that don't exist
+	#TODO  movies that don't exist and return empty list
 
     userProfile = []
     for i in range(0,len(moviesName)):
-        userProfile.append([moviesName[i],moviesRating[i]])
+        if moviesName in movies_name:
+            userProfile.append([moviesName[i],int(moviesRating[i])])
 
+    # no movies exist
+    if not userProfile:
+        abort(400)
     # for i in range(0,len(userProfile)):
     #      print(userProfile[i])
     recommendations_content_based = get_recommendation_content_based(userProfile)
@@ -158,5 +164,17 @@ def get_recommendation_CF(userProfile):
     # print(simCandidates.head(10))
     return simCandidates.head(10)
 
+@app.route('/GetSimilarMovies',methods=['POST'])
+def get_movies_name():
+    if not request.json or not 'moviesName' in request.json:
+       	abort(400)
+    moviesName = request.json.get('moviesName')
+    return_movies_name = []
+    for i in range(0,len(movies_name)):
+        if moviesName in movies_name[i]:
+            return_movies_name.append(movies_name[i])
+    return jsonify({'movie':return_movies_name})
+
 if __name__ == '__main__':
-    app.run(host= '172.30.63.71')
+    # app.run(host= '172.30.93.226')
+    app.run()

@@ -7,7 +7,7 @@ from flask import request
 
 #------------------------------------------------------------------------Content Based
 meta_data = pd.read_csv('/Users/grey/Documents/Big Data/project/files/movies_metadata.csv', encoding='mac_roman')
-links = pd.read_csv('/Users/grey/Documents/Big Data/project/files/links_small.csv', encoding='mac_roman')
+links = pd.read_csv('/Users/grey/Documents/Big Data/project/files/links.csv', encoding='mac_roman')
 links = links[links['tmdbId'].notnull()]['tmdbId'].astype('int')
 
 meta_data = meta_data.drop([4831, 19730, 29503, 35587])
@@ -15,6 +15,7 @@ meta_data = meta_data.drop_duplicates(['title'])
 meta_data['id'] = meta_data['id'].astype('int')
 
 lmd = meta_data[meta_data['id'].isin(links)]
+# lmd = meta_data
 lmd['description'] = lmd['overview']
 lmd['description'] = lmd['description'].fillna('')
 
@@ -51,10 +52,11 @@ corrMatrix = userRatings.corr(method='pearson',min_periods =100)
 # print (corrMatrix.head())
 
 #------------------------------------------------------------------------Read movies name file
-movies_name = set()
-with open('/Users/grey/Downloads/movies_name.txt',encoding='utf-16') as f:
-    movies_name = f.readlines()
 
+with open('/Users/grey/Documents/Progamming on the Cloud/Presentation/movies_name.txt',encoding='utf-16') as f:
+    movies_name = f.readlines()
+movies_name = [x.strip() for x in movies_name]
+# print(movies_name)
 
 # print(indices)
 
@@ -68,16 +70,17 @@ def get_recommendations():
     moviesRating = request.json.get('moviesRating')
     if isinstance(moviesName, str) and isinstance(moviesRating, str) and len(moviesRating) != len(moviesName):
          abort(400)
-	#TODO  movies that don't exist and return empty list
 
     userProfile = []
     for i in range(0,len(moviesName)):
-        if moviesName in movies_name:
-            userProfile.append([moviesName[i],int(moviesRating[i])])
+        if moviesName[i] in movies_name:
+            userProfile.append([moviesName[i],moviesRating[i]])
 
     # no movies exist
-    if not userProfile:
-        abort(400)
+    if len(userProfile) == 0:
+        print('user profile is empty')
+        # abort(400)
+        return jsonify({'movie':[]})
     # for i in range(0,len(userProfile)):
     #      print(userProfile[i])
     recommendations_content_based = get_recommendation_content_based(userProfile)
@@ -104,6 +107,12 @@ def get_recommendations():
     return jsonify({'movie':movies})
 
 def get_recommendations(userProfile):
+    # print(indices)
+    # print(indices[userProfile[0][0]])
+    if "The Bat Man" in indices:
+        print("---------")
+    else:
+        print("aaaaaaaa")
     t = tfidf_matrix[indices[userProfile[0][0]]] * userProfile[0][1]
     for i in range(1, len(userProfile)):
         t = t + tfidf_matrix[indices[userProfile[i][0]]] * userProfile[i][1]
@@ -171,7 +180,7 @@ def get_movies_name():
     moviesName = request.json.get('moviesName')
     return_movies_name = []
     for i in range(0,len(movies_name)):
-        if moviesName in movies_name[i]:
+        if moviesName.lower() in movies_name[i].lower():
             return_movies_name.append(movies_name[i])
     return jsonify({'movie':return_movies_name})
 
